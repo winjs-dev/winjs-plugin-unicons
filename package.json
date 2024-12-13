@@ -1,7 +1,7 @@
 {
-  "name": "winjs-plugin-example",
-  "version": "0.0.0",
-  "repository": "https://github.com/winjs-dev/winjs-plugin-template",
+  "name": "@winner-fed/plugin-unicons",
+  "version": "1.0.1",
+  "repository": "https://github.com/winjs-dev/winjs-plugin-unicons",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -26,6 +26,10 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npm run lint:write"
+  },
+  "dependencies": {
+    "unplugin-icons": "^0.21.0",
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
