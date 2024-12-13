@@ -27,8 +27,7 @@ test('should render page as expected', async ({ page }) => {
 test('should build succeed', async ({ page }) => {
   const rsbuild = await createRsbuild({
     cwd: __dirname,
-    rsbuildConfig: {
-    },
+    rsbuildConfig: {},
   });
 
   await rsbuild.build();
