@@ -1,0 +1,19 @@
+{
+  "name": "playround",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "win dev",
+    "build": "win build",
+    "postinstall": "win setup",
+    "setup": "win setup",
+    "start": "npm run dev",
+    "preview": "win preview"
+  },
+  "dependencies": {
+    "@winner-fed/winjs": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.3"
+  }
+}

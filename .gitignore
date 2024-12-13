@@ -1,0 +1,23 @@
+# Local
+.DS_Store
+*.local
+*.log*
+
+# Dist
+node_modules
+dist/
+test-results
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# playground
+/playground/src/.win
+/playground/src/.win-production
+/playground/src/.win-test
+/playground/components.d.ts
+/playground/auto-imports.d.ts
+/playground/.eslintrc-auto-import.json
