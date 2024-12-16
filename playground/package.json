@@ -16,6 +16,6 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.2.1",
     "@iconify-json/noto-v1": "^1.2.0",
-    "typescript": "^5.0.3"
+    "typescript": "^5.7.2"
   }
 }
