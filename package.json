@@ -28,17 +28,17 @@
     "pre-commit": "npm run lint:write"
   },
   "dependencies": {
-    "unplugin-icons": "^0.21.0",
+    "unplugin-icons": "^0.22.0",
     "svgo": "^3.3.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@playwright/test": "^1.49.0",
-    "@winner-fed/winjs": "^0.11.21",
-    "@winner-fed/utils": "^0.11.21",
-    "@rslib/core": "^0.1.1",
-    "@types/node": "^22.10.1",
-    "playwright": "^1.49.0",
+    "@playwright/test": "^1.49.1",
+    "@winner-fed/winjs": "^0.12.1",
+    "@winner-fed/utils": "^0.12.1",
+    "@rslib/core": "^0.2.0",
+    "@types/node": "^22.10.2",
+    "playwright": "^1.49.1",
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.7.2"
   },
@@ -55,7 +55,7 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.1",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
