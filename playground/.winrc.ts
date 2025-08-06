@@ -16,7 +16,7 @@ cpSync('./@test-scope', './node_modules/@test-scope', { recursive: true });
 export default defineConfig({
   npmClient: 'yarn',
   mountElementId: 'winjsTemplateDemo2c78llfeubf',
-  plugins: ['../dist/index.cjs'],
+  plugins: ['../src/index.ts'],
   unIcons: {
     customCollections: {
       ...ExternalPackageIconLoader('@test-scope/test-color-icons'),

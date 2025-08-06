@@ -14,8 +14,10 @@
     "@winner-fed/winjs": "*"
   },
   "devDependencies": {
+    "@iconify-json/icon-park": "^1.2.2",
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/noto-v1": "^1.2.1",
+    "@iconify-json/ri": "^1.2.5",
     "typescript": "^5.7.3"
   }
 }
