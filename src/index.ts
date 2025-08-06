@@ -1,3 +1,10 @@
+/**
+ * plugin-unicons
+ * @Author: liwb (lwbhtml@163.com)
+ * @Date: 2024-12-09 17:51
+ * @LastEditTime: 2025-8-6 10:51
+ * @Description: plugin-unicons
+ */
 import fs from 'node:fs';
 import { basename, join } from 'node:path';
 import { deepmerge, lodash, reduceConfigs, winPath } from '@winner-fed/utils';
@@ -13,9 +20,22 @@ export default (api: IApi) => {
     key: 'unIcons',
     config: {
       schema({ zod }) {
-        return zod.object({
-          include: zod.array(zod.string()).optional(),
-        });
+        return (
+          zod
+            .object({
+              include: zod.array(zod.string()).optional(),
+              customCollections: zod.record(zod.any()).optional(),
+              autoInstall: zod.boolean().optional(),
+              defaultClass: zod.string().optional(),
+              compiler: zod.string().optional(),
+            })
+            // 通过 .passthrough()，schema 会：
+            // ✅ 验证已定义的字段类型
+            // ✅ 允许额外的未知参数通过验证
+            // ✅ 保留这些额外参数供后续使用
+            // 这样就能更好地支持 unplugin-icons 的各种配置选项，同时保持类型安全性。
+            .passthrough()
+        );
       },
     },
     enableBy: api.EnableBy.config,
@@ -38,6 +58,7 @@ export default (api: IApi) => {
 
   const iconsPath = [
     join(api.paths.absSrcPath, 'icons'),
+    ...(unIconsConfig.include || []),
     ...(api.userConfig?.icons?.include || []),
   ];
 
@@ -127,13 +148,17 @@ function readIconsFromDir(dir: string) {
 
 async function getUnpluginIconsConfig(api: IApi, localIcons: string[]) {
   let frameworkCompiler: string = api.appData.framework || 'vue2';
-  if (api.appData.framework === 'vue') {
+  // 2.7 也是 vue3
+  const vueVersion = api.appData.vue?.version;
+  const isVue2 = vueVersion.startsWith('2.6.');
+  if (api.appData.framework === 'vue' && !isVue2) {
     frameworkCompiler = 'vue3';
   }
 
   const iconDatas: Record<string, string> = {};
   const optimizeSvgDatas = await optimizeSvg(localIcons);
   for (const { fileName, data } of optimizeSvgDatas) {
+    // FIXED by liwb 2023-06-16 13:58:04
     // 处理文件名含有转换中划线时，转换异常
     // 为了防止文件名含有其他字符，这里一律转换为驼峰
     // https://lodash.shujuwajue.com/string/camelcase

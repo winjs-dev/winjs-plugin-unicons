@@ -1,3 +1,10 @@
+/**
+ * optimizeSvg
+ * @Author: liwb (lwbhtml@163.com)
+ * @Date: 2024-12-09 17:51
+ * @LastEditTime: 2024-12-09 17:51
+ * @Description: optimizeSvg
+ */
 import { basename, extname } from 'node:path';
 import { fsExtra } from '@winner-fed/utils';
 import { optimize } from 'svgo';
