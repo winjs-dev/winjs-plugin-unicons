@@ -1,6 +1,14 @@
-# @winner-fed/plugin-unicons
+# winjs-plugin-unicons
 
-🎨 基于 [unplugin-icons](https://github.com/unplugin/unplugin-icons) 的图标解决方案，提供强大的图标管理和使用体验。
+一个为 WinJS 项目提供的图标解决方案，底层基于 [unplugin-icons](https://github.com/unplugin/unplugin-icons) 插件，提供强大的图标管理和使用体验。
+
+<p>
+  <a href="https://npmjs.com/package/@winner-fed/plugin-icons">
+   <img src="https://img.shields.io/npm/v/@winner-fed/plugin-icons?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version" />
+  </a>
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&colorA=564341&colorB=EDED91" alt="license" />
+  <a href="https://npmcharts.com/compare/@winner-fed/plugin-icons?minimal=true"><img src="https://img.shields.io/npm/dm/@winner-fed/plugin-icons.svg?style=flat-square&colorA=564341&colorB=EDED91" alt="downloads" /></a>
+</p>
 
 ## ✨ 特性
 
