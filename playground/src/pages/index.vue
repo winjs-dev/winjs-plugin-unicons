@@ -20,6 +20,7 @@
       <icon-carbon-app-connectivity />
       <icon-custom-car-a />
       <IconWinDog></IconWinDog>
+      <IconWinPet></IconWinPet>
       <IconAccountBox></IconAccountBox>
     </p>
     <h2>Custom Props via Query</h2>
@@ -58,4 +59,5 @@ import ExternalCustom3 from '~icons/test-color-icons/about';
 import Custom2 from '~icons/test-color-icons/about?raw';
 import VSCodePython from '~icons/vscode-icons/file-type-python';
 import IconWinDog from '~icons/win/dog';
+import IconWinPet from '~icons/win/pet';
 </script>

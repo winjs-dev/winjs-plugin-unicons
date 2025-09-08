@@ -42,5 +42,9 @@ export default defineConfig({
         props.color = 'skyblue';
       }
     },
+    svgOptimization: {
+      level: 'balanced',
+      preserveOriginal: true,
+    },
   },
 });
