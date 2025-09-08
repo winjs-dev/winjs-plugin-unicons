@@ -171,7 +171,7 @@ async function getUnpluginIconsConfig(api: IApi, localIcons: string[]) {
   const initialIcons = {
     autoInstall: true,
     compiler: frameworkCompiler,
-    defaultClass: '.unicons-win',
+    defaultClass: 'unicons-win',
     customCollections: {
       win: {
         ...iconDatas,
