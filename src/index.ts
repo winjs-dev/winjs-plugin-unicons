@@ -13,7 +13,7 @@ import IconsResolver from 'unplugin-icons/resolver';
 import RspackIcons from 'unplugin-icons/rspack';
 import ViteIcons from 'unplugin-icons/vite';
 import WebpackIcons from 'unplugin-icons/webpack';
-import optimizeSvg, { type OptimizationLevel } from './optimizeSvg';
+import optimizeSvg from './optimizeSvg';
 
 export default (api: IApi) => {
   api.describe({

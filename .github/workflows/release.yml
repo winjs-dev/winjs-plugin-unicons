@@ -21,14 +21,14 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.8'
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: 安装 pnpm
@@ -77,48 +77,50 @@ jobs:
       - name: 更新版本号 (手动触发时)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          npm version ${{ steps.get_version.outputs.version }} --no-git-tag-version
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add package.json
-          git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}"
-          git tag ${{ steps.get_version.outputs.tag_name }}
-          git push origin HEAD:${{ github.ref_name }}
-          git push origin ${{ steps.get_version.outputs.tag_name }}
+          # 检查 tag 是否已经存在
+          if git show-ref --tags --verify --quiet "refs/tags/${{ steps.get_version.outputs.tag_name }}"; then
+            echo "⚠️ Tag ${{ steps.get_version.outputs.tag_name }} 已存在，跳过创建"
+          else
+            npm version ${{ steps.get_version.outputs.version }} --no-git-tag-version
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add package.json
+            git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}"
+            git tag ${{ steps.get_version.outputs.tag_name }}
+            git push origin HEAD:${{ github.ref_name }}
+            git push origin ${{ steps.get_version.outputs.tag_name }}
+          fi
 
       - name: 生成变更日志
         id: changelog
-        run: |
-          # 获取上一个标签
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
-          if [ -z "$PREV_TAG" ]; then
-            # 如果没有上一个标签，获取所有提交
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
-          else
-            # 获取两个标签之间的提交
-            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
-          fi
-          
-          # 保存到文件以避免特殊字符问题
-          echo "$CHANGELOG" > changelog.txt
-          echo "changelog_file=changelog.txt" >> $GITHUB_OUTPUT
+        run: npx changelogithub
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: 发布到 npm
-        run: pnpm publish --no-git-checks
+        run: |
+          # 检查版本是否已经发布到 npm
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          # 尝试获取 npm 上的版本信息
+          if npm view "${PACKAGE_NAME}@${CURRENT_VERSION}" version 2>/dev/null; then
+            echo "⚠️ 版本 ${CURRENT_VERSION} 已存在于 npm，跳过发布"
+          else
+            echo "📦 发布版本 ${CURRENT_VERSION} 到 npm..."
+            pnpm publish --no-git-checks
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: 创建 GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.get_version.outputs.tag_name }}
-          release_name: Release ${{ steps.get_version.outputs.tag_name }}
-          body_path: ${{ steps.changelog.outputs.changelog_file }}
-          draft: false
-          prerelease: false
+          generateReleaseNotes: "true"
+          allowUpdates: true
+          skipIfReleaseExists: false
+          omitBodyDuringUpdate: false
 
       - name: 通知发布成功
         run: |
