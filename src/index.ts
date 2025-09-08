@@ -13,7 +13,7 @@ import IconsResolver from 'unplugin-icons/resolver';
 import RspackIcons from 'unplugin-icons/rspack';
 import ViteIcons from 'unplugin-icons/vite';
 import WebpackIcons from 'unplugin-icons/webpack';
-import optimizeSvg from './optimizeSvg';
+import optimizeSvg, { type OptimizationLevel } from './optimizeSvg';
 
 export default (api: IApi) => {
   api.describe({
@@ -28,6 +28,16 @@ export default (api: IApi) => {
               autoInstall: zod.boolean().optional(),
               defaultClass: zod.string().optional(),
               compiler: zod.string().optional(),
+              // SVG 优化相关配置
+              svgOptimization: zod
+                .object({
+                  level: zod
+                    .enum(['none', 'minimal', 'balanced', 'aggressive'])
+                    .optional(),
+                  preserveOriginal: zod.boolean().optional(),
+                  customConfig: zod.any().optional(),
+                })
+                .optional(),
             })
             // 通过 .passthrough()，schema 会：
             // ✅ 验证已定义的字段类型
@@ -156,7 +166,15 @@ async function getUnpluginIconsConfig(api: IApi, localIcons: string[]) {
   }
 
   const iconDatas: Record<string, string> = {};
-  const optimizeSvgDatas = await optimizeSvg(localIcons);
+
+  // 获取 SVG 优化配置
+  const svgOptimizationConfig = api.userConfig?.unIcons?.svgOptimization || {};
+  const optimizeSvgDatas = await optimizeSvg(localIcons, {
+    level: svgOptimizationConfig.level || 'balanced',
+    preserveOriginal: svgOptimizationConfig.preserveOriginal || false,
+    customConfig: svgOptimizationConfig.customConfig,
+  });
+
   for (const { fileName, data } of optimizeSvgDatas) {
     // FIXED by liwb 2023-06-16 13:58:04
     // 处理文件名含有转换中划线时，转换异常

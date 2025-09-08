@@ -128,6 +128,20 @@ export default {
     // 编译器类型
     compiler: 'vue3',
     
+    // SVG 优化配置
+    svgOptimization: {
+      // 优化级别：'none' | 'minimal' | 'balanced' | 'aggressive'
+      level: 'balanced',
+      // 是否保留原始 SVG 数据（用于调试）
+      preserveOriginal: false,
+      // 自定义 SVGO 配置
+      customConfig: {
+        plugins: [
+          // 自定义插件配置
+        ]
+      }
+    },
+    
     // 以下是 unplugin-icons 支持的其他配置
     scale: 1.2,
     iconifyApiEndpoint: 'https://api.iconify.design',
@@ -150,6 +164,10 @@ export default {
 | `autoInstall` | `boolean` | `true` | 自动安装图标组件 |
 | `defaultClass` | `string` | `'unicons-win'` | 默认样式类名 |
 | `compiler` | `string` | 自动检测 | 编译器类型，支持 `vue2`、`vue3` 等 |
+| `svgOptimization` | `object` | `{ level: 'balanced' }` | SVG 优化配置 |
+| `svgOptimization.level` | `'none' \| 'minimal' \| 'balanced' \| 'aggressive'` | `'balanced'` | 优化级别 |
+| `svgOptimization.preserveOriginal` | `boolean` | `false` | 是否保留原始 SVG 数据 |
+| `svgOptimization.customConfig` | `object` | `undefined` | 自定义 SVGO 配置 |
 
 #### 扩展配置
 
@@ -222,6 +240,133 @@ import LargeIcon from '~icons/mdi/home?width=2em&height=2em'
 import ColoredIcon from '~icons/mdi/home?color=red'
 </script>
 ```
+
+## 🎨 SVG 优化策略
+
+插件提供了多级 SVG 优化策略，让你在保证原始性和优化效果之间找到平衡：
+
+### 优化级别说明
+
+#### `none` - 无优化
+- 完全保持 SVG 原始状态
+- 不进行任何处理
+- 适用于需要完全保留原始设计的场景
+
+```javascript
+// win.config.js
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'none'
+    }
+  }
+}
+```
+
+#### `minimal` - 最小优化
+- 只做基础清理（移除注释、元数据等）
+- 保留所有样式相关属性（fill、stroke、class 等）
+- 保留 viewBox、xmlns 等重要属性
+- **推荐用于设计精美的图标**
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'minimal'
+    }
+  }
+}
+```
+
+#### `balanced` - 平衡优化（默认）
+- 适度优化，保留重要的样式属性
+- 移除部分冗余属性，但保留 class 用于样式控制
+- 在文件大小和原始性之间取得平衡
+- **适用于大多数使用场景**
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'balanced' // 默认值
+    }
+  }
+}
+```
+
+#### `aggressive` - 激进优化
+- 最大程度优化文件大小
+- 移除 fill、stroke、class 等属性
+- 可能改变图标的原始外观
+- **适用于对文件大小要求严格的场景**
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'aggressive'
+    }
+  }
+}
+```
+
+### 自定义优化配置
+
+你可以通过 `customConfig` 提供自定义的 SVGO 配置：
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'balanced',
+      customConfig: {
+        plugins: [
+          // 添加自定义插件
+          {
+            name: 'addClassesToSVGElement',
+            params: {
+              className: 'my-custom-class'
+            }
+          },
+          // 或者覆盖默认行为
+          {
+            name: 'removeAttrs',
+            params: {
+              attrs: ['data-custom'] // 只移除特定属性
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### 调试优化效果
+
+启用 `preserveOriginal` 选项可以在开发时对比优化前后的差异：
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'balanced',
+      preserveOriginal: true // 开发环境启用
+    }
+  }
+}
+```
+
+### 选择建议
+
+| 场景 | 推荐级别 | 原因 |
+|------|----------|------|
+| 品牌图标、Logo | `minimal` | 保持设计完整性 |
+| 通用 UI 图标 | `balanced` | 平衡优化和兼容性 |
+| 大量简单图标 | `aggressive` | 最小化包体积 |
+| 复杂插画图标 | `none` 或 `minimal` | 避免破坏视觉效果 |
+| 生产环境 | `balanced` | 稳定可靠 |
 
 ## 🔧 高级用法
 
@@ -336,6 +481,57 @@ export default {
     transform: (svg) => svg.replace('currentColor', '#ff0000'),
     scale: 2,
     jsx: 'react'
+  }
+}
+```
+
+### Q: SVG 图标显示异常或样式丢失？
+
+A: 这通常是由于 SVG 优化过度导致的。尝试以下解决方案：
+
+1. **降低优化级别**：
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'minimal' // 或 'none'
+    }
+  }
+}
+```
+
+2. **保留特定属性**：
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: 'balanced',
+      customConfig: {
+        plugins: [
+          {
+            name: 'removeAttrs',
+            params: {
+              attrs: ['data-*'] // 只移除 data 属性，保留其他
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### Q: 如何在不同环境使用不同的优化策略？
+
+A: 可以根据环境变量动态配置：
+
+```javascript
+export default {
+  unIcons: {
+    svgOptimization: {
+      level: process.env.NODE_ENV === 'production' ? 'balanced' : 'minimal',
+      preserveOriginal: process.env.NODE_ENV === 'development'
+    }
   }
 }
 ```
