@@ -33,7 +33,7 @@ const optimizationConfigs: Record<OptimizationLevel, Config> = {
             cleanupIds: false,
           },
         },
-      },
+      } as any,
       // 单独添加基础清理插件
       'removeComments',
       'removeMetadata',
@@ -53,7 +53,7 @@ const optimizationConfigs: Record<OptimizationLevel, Config> = {
             removeUselessStrokeAndFill: false,
           },
         },
-      },
+      } as any,
       'cleanupListOfValues',
       // 适度清理属性，但保留 class 用于样式控制
       {
@@ -75,7 +75,7 @@ const optimizationConfigs: Record<OptimizationLevel, Config> = {
             removeViewBox: false,
           },
         },
-      },
+      } as any,
       'cleanupListOfValues',
       {
         name: 'removeAttrs',
