@@ -1,130 +1,59 @@
+# This action will publish the package to npm and create a GitHub release.
 name: Release
 
 on:
+  # Run `npm run bump` to bump the version and create a git tag.
   push:
     tags:
-      - 'v*'
+      - "v*"
+
   workflow_dispatch:
-    inputs:
-      version:
-        description: '发布版本 (例如: 1.0.0)'
-        required: true
-        type: string
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
-
     steps:
-      - name: 检出代码
+      - name: Checkout
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
-      - name: 设置 Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: 安装 pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.14.0
 
-      - name: 获取 pnpm store 目录
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: 设置 pnpm 缓存
-        uses: actions/cache@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: 22.20.0
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@winner-fed'
+          always-auth: true
 
-      - name: 安装依赖
-        run: |
-          # 尝试使用 frozen lockfile，如果失败则更新 lockfile
-          pnpm install --frozen-lockfile || {
-            echo "⚠️ Lockfile 不匹配，正在更新..."
-            pnpm install --no-frozen-lockfile
-          }
+      - name: Update npm to latest
+        run: npm install -g npm@latest
 
-      - name: 格式检查
-        run: pnpm run lint
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: 构建项目
+      - name: Build
         run: pnpm run build
 
-      - name: 获取版本号
-        id: get_version
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-            echo "tag_name=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 更新版本号 (手动触发时)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          # 检查 tag 是否已经存在
-          if git show-ref --tags --verify --quiet "refs/tags/${{ steps.get_version.outputs.tag_name }}"; then
-            echo "⚠️ Tag ${{ steps.get_version.outputs.tag_name }} 已存在，跳过创建"
-          else
-            npm version ${{ steps.get_version.outputs.version }} --no-git-tag-version
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add package.json
-            git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}"
-            git tag ${{ steps.get_version.outputs.tag_name }}
-            git push origin HEAD:${{ github.ref_name }}
-            git push origin ${{ steps.get_version.outputs.tag_name }}
-          fi
-
-      - name: 生成变更日志
-        id: changelog
-        run: npx changelogithub
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: 发布到 npm
-        run: |
-          # 检查版本是否已经发布到 npm
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          
-          # 尝试获取 npm 上的版本信息
-          if npm view "${PACKAGE_NAME}@${CURRENT_VERSION}" version 2>/dev/null; then
-            echo "⚠️ 版本 ${CURRENT_VERSION} 已存在于 npm，跳过发布"
-          else
-            echo "📦 发布版本 ${CURRENT_VERSION} 到 npm..."
-            pnpm publish --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        run: npm publish --access public --provenance
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: "true"
-          allowUpdates: true
-          skipIfReleaseExists: false
-          omitBodyDuringUpdate: false
 
       - name: 通知发布成功
         run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
           echo "🎉 发布成功!"
           echo "📦 版本: ${{ steps.get_version.outputs.version }}"
           echo "🏷️ 标签: ${{ steps.get_version.outputs.tag_name }}"
-          echo "📝 npm: https://www.npmjs.com/package/@winner-fed/plugin-unicons"
+          echo "📝 npm: https://www.npmjs.com/package/${PACKAGE_NAME}"
