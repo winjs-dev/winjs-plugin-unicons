@@ -41,7 +41,7 @@
     "@winner-fed/utils": "^0.16.10",
     "playwright": "^1.54.2",
     "simple-git-hooks": "^2.13.1",
-    "typescript": "^5.9.2"
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "@rsbuild/core": "1.x",
