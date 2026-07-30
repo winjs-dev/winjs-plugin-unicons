@@ -28,7 +28,7 @@
     "pre-commit": "npm run lint:write"
   },
   "dependencies": {
-    "unplugin-icons": "^22.2.0",
+    "unplugin-icons": "^23.0.1",
     "svgo": "^4.0.0"
   },
   "devDependencies": {
